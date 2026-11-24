@@ -3,7 +3,7 @@ import { z } from "zod";
 // No defaults: a missing value must stop startup, not run with a guess.
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
-  PORT: z.coerce.number("must be a number").int().min(1).max(65535),
+  PORT: z.coerce.number().int().min(1).max(65535),
 });
 
 export const parseEnv = (source: NodeJS.ProcessEnv) => {
