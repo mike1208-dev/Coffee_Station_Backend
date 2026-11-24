@@ -4,3 +4,7 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.test.example
+
+# Generated Prisma client
+src/generated/
