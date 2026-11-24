@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { getHealth } from "./health.controller.js";
+import { getHealth, getHealthDb } from "./health.controller.js";
 
-// Lets the host check that the server is running. It does not check the database.
+// GET /health checks the server only. GET /health/db also checks the database.
 export const healthRouter = Router();
 
 healthRouter.get("/", getHealth);
+healthRouter.get("/db", getHealthDb);
