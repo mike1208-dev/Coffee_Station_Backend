@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseEnv } from "./env.js";
+import { parseEnv } from "./env.schema.js";
 
 describe("parseEnv", () => {
   it("returns typed values", () => {
@@ -14,6 +14,16 @@ describe("parseEnv", () => {
       PORT: 3000,
       DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
     });
+  });
+
+  it("accepts postgres:// without ql", () => {
+    expect(() =>
+      parseEnv({
+        NODE_ENV: "test",
+        PORT: "3000",
+        DATABASE_URL: "postgres://localhost/db",
+      }),
+    ).not.toThrow();
   });
 
   it.each([
