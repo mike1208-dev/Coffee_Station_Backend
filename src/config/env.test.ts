@@ -1,34 +1,115 @@
 import { describe, expect, it } from "vitest";
-import { parseEnv } from "./env.js";
+import { parseEnv } from "./env.schema.js";
 
 describe("parseEnv", () => {
   it("returns typed values", () => {
-    expect(parseEnv({ NODE_ENV: "test", PORT: "3000" })).toEqual({
+    expect(
+      parseEnv({
+        NODE_ENV: "test",
+        PORT: "3000",
+        DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+      }),
+    ).toEqual({
       NODE_ENV: "test",
       PORT: 3000,
+      DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
     });
+  });
+
+  it("accepts postgres:// without ql", () => {
+    expect(() =>
+      parseEnv({
+        NODE_ENV: "test",
+        PORT: "3000",
+        DATABASE_URL: "postgres://localhost/db",
+      }),
+    ).not.toThrow();
   });
 
   it.each([
     [
       "missing PORT",
-      { NODE_ENV: "test" },
+      { NODE_ENV: "test", DATABASE_URL: "postgresql://localhost/db" },
       /PORT: Invalid input: expected number/,
     ],
     [
       "text PORT",
-      { NODE_ENV: "test", PORT: "abc" },
+      {
+        NODE_ENV: "test",
+        PORT: "abc",
+        DATABASE_URL: "postgresql://localhost/db",
+      },
       /PORT: Invalid input: expected number/,
     ],
-    ["PORT 0", { NODE_ENV: "test", PORT: "0" }, /PORT: Too small/],
-    ["PORT above 65535", { NODE_ENV: "test", PORT: "70000" }, /PORT: Too big/],
+    [
+      "PORT 0",
+      {
+        NODE_ENV: "test",
+        PORT: "0",
+        DATABASE_URL: "postgresql://localhost/db",
+      },
+      /PORT: Too small/,
+    ],
+    [
+      "PORT above 65535",
+      {
+        NODE_ENV: "test",
+        PORT: "70000",
+        DATABASE_URL: "postgresql://localhost/db",
+      },
+      /PORT: Too big/,
+    ],
     [
       "decimal PORT",
-      { NODE_ENV: "test", PORT: "3000.5" },
+      {
+        NODE_ENV: "test",
+        PORT: "3000.5",
+        DATABASE_URL: "postgresql://localhost/db",
+      },
       /PORT: Invalid input: expected int/,
     ],
-    ["missing NODE_ENV", { PORT: "3000" }, /NODE_ENV:/],
-    ["unknown NODE_ENV", { NODE_ENV: "prod", PORT: "3000" }, /NODE_ENV:/],
+    [
+      "missing NODE_ENV",
+      { PORT: "3000", DATABASE_URL: "postgresql://localhost/db" },
+      /NODE_ENV:/,
+    ],
+    [
+      "unknown NODE_ENV",
+      {
+        NODE_ENV: "prod",
+        PORT: "3000",
+        DATABASE_URL: "postgresql://localhost/db",
+      },
+      /NODE_ENV:/,
+    ],
+    [
+      "missing DATABASE_URL",
+      { NODE_ENV: "test", PORT: "3000" },
+      /DATABASE_URL:/,
+    ],
+    [
+      "invalid DATABASE_URL",
+      { NODE_ENV: "test", PORT: "3000", DATABASE_URL: "not-a-url" },
+      /DATABASE_URL:/,
+    ],
+    [
+      "DATABASE_URL with wrong protocol",
+      {
+        NODE_ENV: "test",
+        PORT: "3000",
+        DATABASE_URL: "mysql://localhost/db",
+      },
+      /DATABASE_URL:/,
+    ],
+    [
+      "DATABASE_URL as http",
+      {
+        NODE_ENV: "test",
+        PORT: "3000",
+        DATABASE_URL: "http://example.com",
+      },
+      /DATABASE_URL:/,
+    ],
   ])("rejects %s", (_name, source, message) => {
     expect(() => parseEnv(source)).toThrow(message);
   });
