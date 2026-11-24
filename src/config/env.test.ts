@@ -82,6 +82,24 @@ describe("parseEnv", () => {
       { NODE_ENV: "test", PORT: "3000", DATABASE_URL: "not-a-url" },
       /DATABASE_URL:/,
     ],
+    [
+      "DATABASE_URL with wrong protocol",
+      {
+        NODE_ENV: "test",
+        PORT: "3000",
+        DATABASE_URL: "mysql://localhost/db",
+      },
+      /DATABASE_URL:/,
+    ],
+    [
+      "DATABASE_URL as http",
+      {
+        NODE_ENV: "test",
+        PORT: "3000",
+        DATABASE_URL: "http://example.com",
+      },
+      /DATABASE_URL:/,
+    ],
   ])("rejects %s", (_name, source, message) => {
     expect(() => parseEnv(source)).toThrow(message);
   });
