@@ -37,6 +37,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run db:generate
+      - run: npx prisma migrate deploy
+      - run: npx prisma db seed
+        env:
+          NODE_ENV: test
+
       - run: npm run format:check
       - run: npm run typecheck
       - run: npm run lint
