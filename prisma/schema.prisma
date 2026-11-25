@@ -26,7 +26,7 @@ model Product {
   orderItems  OrderItem[]
 }
 
-enum Status {
+enum OrderStatus {
   Pending
   Confirmed
   Completed
@@ -39,7 +39,7 @@ model Order {
   customerName String
   phone        String
   note         String?
-  status       Status      @default(Pending)
+  status       OrderStatus @default(Pending)
   totalPrice   Decimal
   createdAt    DateTime    @default(now())
   items        OrderItem[]
