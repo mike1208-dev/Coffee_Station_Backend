@@ -10,20 +10,22 @@ afterEach(async () => {
 });
 
 async function createOrder(orderNumber = `TEST-${randomUUID()}`) {
-  const product = await prisma.product.findFirstOrThrow();
+  const product = await prisma.product.findFirstOrThrow({
+    where: { name: "Classic Latte" },
+  });
   const order = await prisma.order.create({
     data: {
       orderNumber,
       customerName: "Test Customer",
       phone: "000-0000-0000",
-      totalPrice: product.price.mul(2),
+      totalPrice: product.price.mul(3),
       items: {
         create: [
           {
             productId: product.id,
             productName: product.name,
             unitPrice: product.price,
-            quantity: 2,
+            quantity: 3,
           },
         ],
       },
@@ -35,12 +37,20 @@ async function createOrder(orderNumber = `TEST-${randomUUID()}`) {
 }
 
 describe("Order model", () => {
-  it("saves an order with its items and starts as Pending", async () => {
+  it("saves an order with its items and reads them back", async () => {
     const order = await createOrder();
 
-    expect(order.status).toBe("Pending");
-    expect(order.items).toHaveLength(1);
-    expect(order.items[0]!.quantity).toBe(2);
+    const saved = await prisma.order.findUniqueOrThrow({
+      where: { id: order.id },
+      include: { items: true },
+    });
+
+    expect(saved.status).toBe("Pending");
+    expect(saved.totalPrice.toString()).toBe("13.5");
+    expect(saved.items).toHaveLength(1);
+    expect(saved.items[0]!.productName).toBe("Classic Latte");
+    expect(saved.items[0]!.unitPrice.toString()).toBe("4.5");
+    expect(saved.items[0]!.quantity).toBe(3);
   });
 
   it("rejects a duplicate order number", async () => {

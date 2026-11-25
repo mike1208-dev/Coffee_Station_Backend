@@ -16,14 +16,14 @@ enum Category {
 }
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   category    Category
   description String
   price       Decimal
   imageUrl    String
   rating      Float
-  orderItems OrderItem[]
+  orderItems  OrderItem[]
 }
 
 enum Status {
@@ -34,14 +34,14 @@ enum Status {
 }
 
 model Order {
-  id           String  @id @default(uuid())
-  orderNumber  String  @unique
+  id           String      @id @default(uuid())
+  orderNumber  String      @unique
   customerName String
   phone        String
   note         String?
-  status       Status  @default(Pending)
+  status       Status      @default(Pending)
   totalPrice   Decimal
-  createdAt    DateTime @default(now())
+  createdAt    DateTime    @default(now())
   items        OrderItem[]
 }
 
@@ -54,21 +54,24 @@ model OrderItem {
   productName String
   unitPrice   Decimal
   quantity    Int
+
+  @@index([orderId])
 }
 
-enum Time {
-  Morning
-  Afternoon
-  Evening
+// Morning = "09:00", Afternoon = "13:00", Evening = "18:00"
+enum BookingTime {
+  Morning   @map("09:00")
+  Afternoon @map("13:00")
+  Evening   @map("18:00")
 }
 
 model Booking {
-  id           String  @id @default(cuid())
-  name         String
-  phone        String
-  date         DateTime @db.Date
-  time         Time
-  guestCount   Int
-  note         String?
-  createdAt    DateTime @default(now())
+  id         String      @id @default(cuid())
+  name       String
+  phone      String
+  date       DateTime    @db.Date
+  time       BookingTime
+  guestCount Int
+  note       String?
+  createdAt  DateTime    @default(now())
 }
