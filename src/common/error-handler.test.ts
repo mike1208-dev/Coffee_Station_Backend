@@ -17,6 +17,9 @@ function createTestApp() {
   testApp.get("/async-crash", async () => {
     throw new Error("secret async detail");
   });
+  testApp.post("/echo", express.json(), (req, res) => {
+    res.json(req.body);
+  });
 
   testApp.use(notFoundHandler);
   testApp.use(errorHandler);
@@ -59,5 +62,23 @@ describe("error handling", () => {
 
     expect(res.status).toBe(500);
     expect(res.body).toEqual({ error: { message: "Internal server error" } });
+  });
+
+  it.each([
+    ["broken JSON", "{bad", 400, "Invalid request"],
+    [
+      "a body that is too large",
+      JSON.stringify({ data: "x".repeat(200_000) }),
+      413,
+      "Request body too large",
+    ],
+  ])("answers %s with its 4xx status", async (_name, body, status, message) => {
+    const res = await request(createTestApp())
+      .post("/echo")
+      .set("Content-Type", "application/json")
+      .send(body);
+
+    expect(res.status).toBe(status);
+    expect(res.body).toEqual({ error: { message } });
   });
 });
