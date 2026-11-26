@@ -9,7 +9,15 @@ describe("GET /api/products", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(await prisma.product.count());
-    expect(typeof res.body[0].price).toBe("number");
+    expect(res.body).toContainEqual({
+      id: expect.any(String),
+      name: "Classic Latte",
+      category: "Coffee",
+      description: "Rich espresso with steamed milk and a light layer of foam.",
+      price: 4.5,
+      imageUrl: "/images/coffee-1.avif",
+      rating: 4.8,
+    });
   });
 
   it("returns only products in the given category", async () => {
@@ -30,5 +38,8 @@ describe("GET /api/products", () => {
     );
 
     expect(res.status).toBe(400);
+    expect(res.body).toEqual({
+      error: { message: "Invalid category: NotARealCategory" },
+    });
   });
 });
