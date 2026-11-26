@@ -4,6 +4,7 @@ import { mainRouter } from "./routes/index.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 
 export const app = express();
+app.use(express.json());
 
 app.use("/health", healthRouter);
 app.use("/api", mainRouter);
