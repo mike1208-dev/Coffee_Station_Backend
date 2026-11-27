@@ -9,7 +9,10 @@ interface CreateOrderBody {
   items: { productId: string; quantity: number }[];
 }
 
-export async function postOrder(req: Request<unknown, unknown, CreateOrderBody>, res: Response) {
+export async function postOrder(
+  req: Request<unknown, unknown, CreateOrderBody>,
+  res: Response,
+) {
   const input = validate(createOrderSchema, req.body as CreateOrderBody);
   const order = await createOrder(input);
   res.status(201).json({
