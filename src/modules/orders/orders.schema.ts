@@ -13,6 +13,11 @@ export const createOrderSchema = z
           })
           .strict(),
       )
-      .min(1),
+      .min(1)
+      .refine(
+        (items) =>
+          new Set(items.map((item) => item.productId)).size === items.length,
+        "Each product can appear only once",
+      ),
   })
   .strict();

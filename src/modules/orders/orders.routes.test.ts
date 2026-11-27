@@ -99,6 +99,17 @@ describe("POST /api/orders", () => {
     expect(res.status).toBe(400);
   });
 
+  it("returns 400 when the same product is listed twice", async () => {
+    const body = await validBody();
+
+    const res = await postOrder({
+      ...body,
+      items: [...body.items, ...body.items],
+    });
+
+    expect(res.status).toBe(400);
+  });
+
   it("returns 400 for an unknown product and saves nothing", async () => {
     const body = await validBody();
     const before = await prisma.order.count();
