@@ -110,6 +110,16 @@ describe("POST /api/orders", () => {
     expect(res.status).toBe(400);
   });
 
+  it("gives orders placed at the same time different order numbers", async () => {
+    const body = await validBody();
+
+    const results = await Promise.all(
+      Array.from({ length: 20 }, () => postOrder(body)),
+    );
+
+    expect(results.map((res) => res.status)).toEqual(Array(20).fill(201));
+  });
+
   it("returns 400 for an unknown product and saves nothing", async () => {
     const body = await validBody();
     const before = await prisma.order.count();
