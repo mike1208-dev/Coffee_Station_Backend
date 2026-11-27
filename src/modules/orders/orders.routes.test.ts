@@ -39,6 +39,7 @@ describe("POST /api/orders", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.customerName).toBe("Jane Doe");
+    expect(res.body.phone).toBe("555-1234");
     expect(typeof res.body.totalPrice).toBe("number");
     expect(res.body.totalPrice).toBeCloseTo(product.price.toNumber() * 2);
     expect(res.body.items).toHaveLength(1);
@@ -56,13 +57,13 @@ describe("POST /api/orders", () => {
       phone: "555-1234",
       items: [
         { productId: a.id, quantity: 2 },
-        { productId: b.id, quantity: 3 },
+        { productId: b.id, quantity: 20 },
       ],
     });
 
     expect(res.status).toBe(201);
     expect(res.body.totalPrice).toBeCloseTo(
-      a.price.toNumber() * 2 + b.price.toNumber() * 3,
+      a.price.toNumber() * 2 + b.price.toNumber() * 20,
     );
     expect(
       res.body.items.map((i: { productName: string }) => i.productName),
@@ -77,6 +78,10 @@ describe("POST /api/orders", () => {
     ["items is missing", { items: undefined }],
     ["items is empty", { items: [] }],
     ["an unknown field is sent", { discountCode: "SAVE10" }],
+    ["customerName is only spaces", { customerName: "   " }],
+    ["customerName is too long", { customerName: "x".repeat(101) }],
+    ["phone is only spaces", { phone: "   " }],
+    ["phone is too long", { phone: "1".repeat(31) }],
   ])("returns 400 when %s", async (_name, change) => {
     const res = await postOrder({ ...(await validBody()), ...change });
 
