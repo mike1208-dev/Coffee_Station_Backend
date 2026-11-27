@@ -127,7 +127,8 @@ describe("POST /api/orders", () => {
 
   it("returns 400 for an unknown product and saves nothing", async () => {
     const body = await validBody();
-    const before = await prisma.order.count();
+    const where = { customerName: body.customerName, phone: body.phone };
+    const before = await prisma.order.count({ where });
 
     const res = await postOrder({
       ...body,
@@ -135,6 +136,6 @@ describe("POST /api/orders", () => {
     });
 
     expect(res.status).toBe(400);
-    expect(await prisma.order.count()).toBe(before);
+    expect(await prisma.order.count({ where })).toBe(before);
   });
 });
