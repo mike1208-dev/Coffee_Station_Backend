@@ -13,17 +13,16 @@ export async function createOrder(input: CreateOrderInput) {
   const products = await prisma.product.findMany({
     where: { id: { in: productIds } },
   });
-  const productById = new Map(products.map((product) => [product.id, product]));
 
   const orderItemsData = input.items.map((item) => {
-    const product = productById.get(item.productId);
-    if (!product) {
+    const matchedProduct = products.find(({ id }) => id === item.productId);
+    if (!matchedProduct) {
       throw new BadRequestError(`Unknown product: ${item.productId}`);
     }
     return {
-      productId: product.id,
-      productName: product.name,
-      unitPrice: product.price,
+      productId: matchedProduct.id,
+      productName: matchedProduct.name,
+      unitPrice: matchedProduct.price,
       quantity: item.quantity,
     };
   });
